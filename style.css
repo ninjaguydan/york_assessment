@@ -1,0 +1,81 @@
+:root {
+	--dark-gray: #aeaeb8;
+}
+* {
+	/* outline: 1px dotted magenta; */
+}
+body {
+	font-family: Helvetica, sans-serif;
+	background-color: #dededf;
+}
+section {
+	max-width: 500px;
+	padding: 2rem;
+	background-color: white;
+	box-shadow: 5px 5px 5px var(--dark-gray);
+	border-radius: 5px;
+	margin: 10rem auto 0;
+}
+form {
+	padding: 1rem 0;
+	display: flex;
+	flex-direction: column;
+	row-gap: 1rem;
+}
+form input {
+	padding: 0.25rem;
+}
+h1 {
+	text-align: center;
+	font-size: 2em;
+	text-transform: uppercase;
+	font-weight: 800;
+	padding: 0.5rem;
+	border-bottom: 1px solid var(--dark-gray);
+}
+#form-1 .input-group {
+	display: grid;
+	grid-template-columns: repeat(10, 1fr);
+}
+#form-1 .input-group label {
+	grid-column: 1 / 3;
+}
+#form-1 .input-group div {
+	grid-column: 3 / 11;
+	display: flex;
+	flex-direction: column;
+	row-gap: 0.25rem;
+}
+#form-1 .input-group input.error {
+	border-color: red;
+}
+#form-1 .input-group strong {
+	color: red;
+}
+button {
+	padding: 0.65rem;
+	background-color: mediumorchid;
+	border-radius: 3px;
+	color: white;
+	font-weight: 600;
+	cursor: pointer;
+}
+button:hover {
+	background-color: #9c46b1;
+}
+#form-2 {
+	border-top: 1px solid var(--dark-gray);
+}
+#form-2 label {
+	font-weight: 700;
+}
+#form-2 button {
+	padding: 0.35rem;
+}
+#form-2 input {
+	width: 4rem;
+}
+#msg {
+	margin: 1rem 0;
+	color: green;
+}
