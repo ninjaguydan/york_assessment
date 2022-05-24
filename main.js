@@ -7,11 +7,24 @@ const lname = document.getElementById("lname")
 const uid = document.getElementById("uid")
 const bday = document.getElementById("bday")
 const num = document.getElementById("num")
+let flagSubmit = true
 let errors = {
-	uid: true,
-	fname: true,
-	lname: true,
-	bday: true,
+	uid: {
+		status: true,
+		message: "Invalid User ID",
+	},
+	fname: {
+		status: true,
+		message: "Invalid First Name",
+	},
+	lname: {
+		status: true,
+		message: "Invalid Last Name",
+	},
+	bday: {
+		status: true,
+		message: "Invalid Birthday",
+	},
 }
 
 function displayX(num) {
@@ -27,14 +40,28 @@ form2.addEventListener("submit", (e) => {
 	xbox.innerHTML = null
 	displayX(num.value)
 })
-function check_length(str, min, max) {
-	if (str.length < min || uid.length > max) {
+
+function checkLength(str, min = 2, max = 12) {
+	if (!str.length || str.length < min || str.length > max) {
 		return false
 	} else {
 		return true
 	}
 }
+function dateDiff(birthday) {
+	const today = new Date()
+	const bday = new Date(birthday)
+	const daysAlive = Math.floor((today - bday) / 86400000)
+	const over18 = daysAlive > 6570
+	return {
+		daysAlive,
+		over18,
+	}
+}
 function validateUser(value) {
+	if (!checkLength(value, 8, 12)) {
+		return false
+	}
 	let [uppercase, lowercase, num] = [false]
 	for (let i = 0; i < value.length; i++) {
 		if (Number.isInteger(parseInt(value[i]))) {
@@ -55,20 +82,20 @@ function validateUser(value) {
 		}
 	}
 	if (!uppercase || !lowercase || !num) {
-		errors["uid"] = true
 		return false
 	} else {
-		delete errors["uid"]
 		return true
 	}
 }
-function dateDiff(birthday) {
-	const today = new Date()
-	const bday = new Date(birthday)
-	return Math.floor((today - bday) / 86400000)
+function validateField(element, element_id) {
+	if (element_id === "uid") {
+		validateUser(element.value) ? (errors[element_id].status = false) : (errors[element_id].status = true)
+		return
+	}
+	checkLength(element.value) ? (errors[element_id].status = false) : (errors[element_id].status = true)
 }
-function displayError(element, element_id, message, error) {
-	if (error) {
+function displayError(element, element_id, message, status) {
+	if (status) {
 		element.classList.add("error")
 		document.querySelector(`#${element_id} + strong`).innerHTML = message
 	} else {
@@ -76,101 +103,144 @@ function displayError(element, element_id, message, error) {
 		document.querySelector(`#${element_id} + strong`).innerHTML = null
 	}
 }
-function blurAction(element, min, max, element_id, input_label) {
-	if (!check_length(element.value, min, max)) {
-		errors[element_id] = true
-		displayError(element, element_id, `${input_label} must be between ${min} and ${max} characters`, true)
-	} else {
-		delete errors[element_id]
-		displayError(element, element_id, null, false)
-	}
-}
 
 fname.addEventListener("blur", () => {
-	blurAction(fname, 2, 12, "fname", "First Name")
+	validateField(fname, "fname")
+	displayError(fname, "fname", errors.fname.message, errors.fname.status)
 })
 lname.addEventListener("blur", () => {
-	blurAction(lname, 2, 12, "lname", "Last Name")
+	validateField(lname, "lname")
+	displayError(lname, "lname", errors.lname.message, errors.lname.status)
 })
 uid.addEventListener("blur", () => {
-	blurAction(uid, 8, 12, "uid", "User ID")
+	validateField(uid, "uid")
+	displayError(uid, "uid", errors.uid.message, errors.uid.status)
 })
 bday.addEventListener("blur", () => {
-	if (!bday.value) {
-		errors["bday"] = true
-		displayError(bday, "bday", "Must enter birthday", true)
-	} else {
-		delete errors["bday"]
-		displayError(bday, "bday", null, false)
-	}
+	validateField(bday, "bday")
+	displayError(bday, "bday", errors.bday.message, errors.bday.status)
 })
 form1.addEventListener("submit", (e) => {
 	e.preventDefault()
-	if (!validateUser(uid.value)) {
-		errors["uid"] = true
-		displayError(uid, "uid", "Invalid User ID", true)
-	} else {
-		delete errors["uid"]
-		displayError(uid, "uid", null, false)
+	for (let key in errors) {
+		if (errors[key].status) {
+			displayError(document.getElementById(key), key, errors[key].message, errors[key].status)
+			flagSubmit = true
+		} else {
+			flagSubmit = false
+		}
 	}
-	errors["fname"] ? displayError(fname, "fname", "Must enter first name", true) : displayError(fname, "fname", null, false)
-	errors["lname"] ? displayError(lname, "lname", "Must enter last name", true) : displayError(lname, "lname", null, false)
-	errors["bday"] ? displayError(bday, "bday", "Must enter birthday", true) : displayError(bday, "bday", null, false)
-
-	if (Object.keys(errors).length === 0) {
-		message.innerHTML = `Congrats! You've been breathing for ${dateDiff(bday.value)} days! `
-		if (dateDiff(bday.value) < 6570) {
+	if (!flagSubmit) {
+		message.innerHTML = `Congrats! You've been breathing for ${dateDiff(bday.value).daysAlive} days! `
+		if (!dateDiff(bday.value).over18) {
 			message.innerHTML += `You're probably not old enough to take this class...`
 		}
 	}
 })
 
-// //testing the length
-// function test_check_length() {
-// //Arrange
-//     const uid = "Danboy53"
-//     const expected = true
-// //Act
-//     const result = check_length(uid)
-// //Assert
-//     if (result !== expected){
-//         console.log (`check_length failed - expected: ${expected} -> actual: ${result}`)
-//     }
-//  }
-// test_check_length()
-// //user id validated by loop that has conditions to check variables uppercase, lowercase, and number--> had to use continue
-// //to make loop move passed the number bc numbers were passing uppercase/lowercase condition. HOW???
-//
-
-// function test_Validate_User(){
-//     //Arrange
-//     const username = "sally"
-//     const expected = true
-
-//     //Act
-//     const result = validate_User(username)
-
-//     //Assert
-//     if (result !== expected){
-//         console.log(`Validate_User failed - expected: ${expected} -> actual: ${result}`)
-//     }
-// }
-// test_Validate_User()
-
-//
-//
-// console.log (dateDiff("1989-08-23"))
-
-// //86400000 milliseconds in a day
-
-// function test_dateDiff() {
-// //Arrange
-//     const bday = "1989-09-23"
-//     const expected = 11953
-// //Act
-//     const result = dateDiff(bday)
-// //Assert
-//     if (result !== expected) {
-//         console.log(`This aint work bro! We wanted ${expected}, but we got ${result}.`)
-//     }
-// }
+//========== TEST FUNCTIONS ==========//
+function test_check_length_pass() {
+	const str = "danboy"
+	const expected = true
+	const result = checkLength(str)
+	if (result !== expected) {
+		console.log(`checkLength faild. '${str}' should return ${expected} but came back ${result}`)
+	} else {
+		console.log(`checkLength working. Test string passes`)
+	}
+}
+function test_check_length_too_long() {
+	const str = "danboy123456789"
+	const expected = false
+	const result = checkLength(str)
+	if (result !== expected) {
+		console.log(`checkLength faild. '${str}' should return ${expected} but came back ${result}`)
+	} else {
+		console.log("checkLength working. Test string too long.")
+	}
+}
+function test_check_length_empty() {
+	const str = ""
+	const expected = false
+	const result = checkLength(str)
+	if (result !== expected) {
+		console.log(`checkLength faild. '${str}' should return ${expected} but came back ${result}`)
+	} else {
+		console.log("checkLength working. Test string empty.")
+	}
+}
+function test_date_diff_pass() {
+	const birthday = "1989-08-23"
+	const expected = {
+		daysAlive: "",
+		over18: true,
+	}
+	const result = dateDiff(birthday)
+	if (expected.over18 !== result.over18) {
+		console.log(`dateDiff failed. ${birthday} is older than 18 years, but returned ${result.over18}`)
+	} else {
+		console.log("dateDiff working. Returns true when expected.")
+	}
+}
+function test_date_diff_fail() {
+	const birthday = "2020-08-23"
+	const expected = {
+		daysAlive: "",
+		over18: false,
+	}
+	const result = dateDiff(birthday)
+	if (expected.over18 !== result.over18) {
+		console.log(`dateDiff failed. ${birthday} is younger than 18 years, but returned ${result.over18}`)
+	} else {
+		console.log("dateDiff working. Returns false when expected.")
+	}
+}
+function test_validate_user_pass() {
+	const value = "Danboy0812"
+	const result = true
+	const expected = validateUser(value)
+	if (expected !== result) {
+		console.log(`validateUser failed. ${value} should pass but returns ${result}`)
+	} else {
+		console.log(`validateUser working. Test string passes`)
+	}
+}
+function test_validate_user_no_num() {
+	const value = "Danboyabcd"
+	const result = false
+	const expected = validateUser(value)
+	if (expected !== result) {
+		console.log(`validateUser failed. ${value} should fail but returns ${result}`)
+	} else {
+		console.log(`validateUser working. Test string has no numbers`)
+	}
+}
+function test_validate_user_no_cap() {
+	const value = "danboy0812"
+	const result = false
+	const expected = validateUser(value)
+	if (expected !== result) {
+		console.error(`validateUser failed. ${value} should fail but returns ${result}`)
+	} else {
+		console.log(`validateUser working. Test string has no capital letters`)
+	}
+}
+function test_validate_user_no_lower() {
+	const value = "DANBOY0812"
+	const result = false
+	const expected = validateUser(value)
+	if (expected !== result) {
+		console.error(`validateUser failed. ${value} should fail but returns ${result}`)
+	} else {
+		console.log(`validateUser working. Test string has no lowercase letters`)
+	}
+}
+test_check_length_pass()
+test_check_length_too_long()
+test_check_length_empty()
+test_date_diff_pass()
+test_date_diff_fail()
+test_validate_user_pass()
+test_validate_user_no_num()
+test_validate_user_no_cap()
+test_validate_user_no_lower()
