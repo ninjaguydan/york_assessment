@@ -80,3 +80,8 @@ button:hover {
 	margin: 1rem 0;
 	color: green;
 }
+@media only screen and (max-width: 570px) {
+	section {
+		margin: 0;
+	}
+}
