@@ -7,7 +7,6 @@ const lname = document.getElementById("lname")
 const uid = document.getElementById("uid")
 const bday = document.getElementById("bday")
 const num = document.getElementById("num")
-let flagSubmit = true
 let errors = {
 	uid: {
 		status: true,
@@ -103,17 +102,28 @@ function displayError(element, element_id, message, status) {
 		document.querySelector(`#${element_id} + strong`).innerHTML = null
 	}
 }
+function displayPass(element, element_id, status) {
+	if (!status) {
+		document.querySelector(`#${element_id} ~ span`).style.display = "inline-block"
+	} else {
+		element.classList.remove("error")
+		document.querySelector(`#${element_id} ~ span`).style.display = "none"
+	}
+}
 
 fname.addEventListener("blur", () => {
 	validateField(fname, "fname")
+	displayPass(fname, "fname", errors.fname.status)
 	displayError(fname, "fname", errors.fname.message, errors.fname.status)
 })
 lname.addEventListener("blur", () => {
 	validateField(lname, "lname")
+	displayPass(lname, "lname", errors.lname.status)
 	displayError(lname, "lname", errors.lname.message, errors.lname.status)
 })
 uid.addEventListener("blur", () => {
 	validateField(uid, "uid")
+	displayPass(uid, "uid", errors.uid.status)
 	displayError(uid, "uid", errors.uid.message, errors.uid.status)
 })
 bday.addEventListener("blur", () => {
@@ -125,16 +135,17 @@ form1.addEventListener("submit", (e) => {
 	for (let key in errors) {
 		if (errors[key].status) {
 			displayError(document.getElementById(key), key, errors[key].message, errors[key].status)
-			flagSubmit = true
-		} else {
-			flagSubmit = false
 		}
 	}
-	if (!flagSubmit) {
-		message.innerHTML = `Congrats! You've been breathing for ${dateDiff(bday.value).daysAlive} days! `
-		if (!dateDiff(bday.value).over18) {
-			message.innerHTML += `You're probably not old enough to take this class...`
+	// violating DRY rule here
+	for (let key in errors) {
+		if (errors[key].status) {
+			return
 		}
+	}
+	message.innerHTML = `Congrats, ${fname.value}! You've been breathing for ${dateDiff(bday.value).daysAlive} days! `
+	if (!dateDiff(bday.value).over18) {
+		message.innerHTML += `You're probably not old enough to take this class...`
 	}
 })
 
