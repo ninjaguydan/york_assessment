@@ -144,7 +144,9 @@ form1.addEventListener("submit", (e) => {
 		}
 	}
 	message.innerHTML = `Congrats, ${fname.value}! You've been breathing for ${dateDiff(bday.value).daysAlive} days! `
-	if (!dateDiff(bday.value).over18) {
+	if (dateDiff(bday.value).daysAlive <= 0) {
+		message.innerHTML += `Wait, you're from the future? So... they've finally found me, and they sent you to hunt me down? They'll have to do better than that.`
+	} else if (!dateDiff(bday.value).over18) {
 		message.innerHTML += `You're probably not old enough to take this class...`
 	}
 })
